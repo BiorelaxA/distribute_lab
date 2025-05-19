@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * AuctionImpl 实现了拍卖逻辑，并维护 itemID->当前最高出价 的映射
+ * 拍卖实现类，支持添加新物品和竞价
  */
 public class AuctionImpl extends UnicastRemoteObject implements Auction {
     private final Map<String, Double> currentBids;
@@ -38,7 +38,16 @@ public class AuctionImpl extends UnicastRemoteObject implements Auction {
 
     @Override
     public synchronized Map<String, Double> getAllItems() throws RemoteException {
-        // 返回一个拷贝，防止客户端修改
-        return new HashMap<>(currentBids);
+        return new HashMap<>(currentBids); // 返回物品和当前竞价
+    }
+
+    @Override
+    public synchronized boolean addItem(String itemID, double startingPrice) throws RemoteException {
+        if (!currentBids.containsKey(itemID)) {
+            currentBids.put(itemID, startingPrice); // 添加新的物品和价格
+            System.out.printf("Added new item: %s with starting price: %.2f%n", itemID, startingPrice);
+            return true;
+        }
+        return false; // 如果物品ID已存在，则不能添加
     }
 }
