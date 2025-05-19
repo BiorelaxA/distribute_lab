@@ -6,37 +6,39 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Auction 接口实现：维护每个 itemID 的最高出价和最高出价者
+ * AuctionImpl 实现了拍卖逻辑，并维护 itemID->当前最高出价 的映射
  */
 public class AuctionImpl extends UnicastRemoteObject implements Auction {
-
-    private final Map<String, Double> currentBids = new HashMap<>();
-    private final Map<String, String> highestBidder = new HashMap<>();
+    private final Map<String, Double> currentBids;
 
     protected AuctionImpl() throws RemoteException {
         super();
-        // 可初始化若干拍卖物品
-        currentBids.put("item001", 0.0);
-        highestBidder.put("item001", "No bids yet");
+        currentBids = new HashMap<>();
+        // 初始化一些示例物品
+        currentBids.put("item001", 100.0);
+        currentBids.put("item002", 250.0);
+        currentBids.put("item003", 75.0);
     }
 
     @Override
-    public synchronized boolean placeBid(String itemID, double bid, String bidderName) throws RemoteException {
+    public synchronized boolean placeBid(String itemID, double bidAmount, String bidderName) throws RemoteException {
         double current = currentBids.getOrDefault(itemID, 0.0);
-        if (bid > current) {
-            currentBids.put(itemID, bid);
-            highestBidder.put(itemID, bidderName);
-            System.out.printf("New highest bid: %s bids %.2f on %s%n", bidderName, bid, itemID);
+        if (bidAmount > current) {
+            currentBids.put(itemID, bidAmount);
+            System.out.printf("New bid: %s bids %.2f on %s%n", bidderName, bidAmount, itemID);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
-    public synchronized String getCurrentBid(String itemID) throws RemoteException {
-        double bid = currentBids.getOrDefault(itemID, 0.0);
-        String name = highestBidder.getOrDefault(itemID, "No bids yet");
-        return String.format("%.2f by %s", bid, name);
+    public synchronized double getCurrentBid(String itemID) throws RemoteException {
+        return currentBids.getOrDefault(itemID, 0.0);
+    }
+
+    @Override
+    public synchronized Map<String, Double> getAllItems() throws RemoteException {
+        // 返回一个拷贝，防止客户端修改
+        return new HashMap<>(currentBids);
     }
 }
