@@ -1,0 +1,3 @@
+com\example\MovieRatingCount$JoinCountMapper.class
+com\example\MovieRatingCount.class
+com\example\MovieRatingCount$SumReducer.class
